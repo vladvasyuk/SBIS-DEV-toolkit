@@ -15,6 +15,6 @@ setup(name='SBISPythonToolkit',
          'gitpython'
       ],
       package_data={
-          'sbis_toolkit': ['sbis_toolkit/config.ini'],
+          'sbis_toolkit': ['config.ini'],
       }
      )
