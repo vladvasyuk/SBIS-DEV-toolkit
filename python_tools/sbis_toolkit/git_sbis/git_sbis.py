@@ -74,14 +74,16 @@ def get_branches_for_mr():
    """
    Получить ветки, в которые нужно создать merge request
    """
-   cur_branch_name = parse_branch_name(get_current_branch_name())['parent_branch']
-   rc_branches = get_rc_branches()
-   cur_branch_val = get_branch_value(cur_branch_name)
    res = ['development']
+   cur_branch_name = parse_branch_name(get_current_branch_name())['parent_branch']
 
-   for rc_branch in rc_branches:
-      if cur_branch_val <= get_branch_value(rc_branch.name):
-         res.append(rc_branch.name)
+   if cur_branch_name != 'dev':
+      rc_branches = get_rc_branches()
+      cur_branch_val = get_branch_value(cur_branch_name)
+
+      for rc_branch in rc_branches:
+         if cur_branch_val <= get_branch_value(rc_branch.name):
+            res.append(rc_branch.name)
 
    return res
 
