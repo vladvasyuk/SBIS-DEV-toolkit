@@ -18,10 +18,10 @@ CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(sbis_toolkit.__file_
 
 
 class DefaultHelpParser(argparse.ArgumentParser):
-    def error(self, message):
-        sys.stderr.write('error: %s\n' % message)
-        self.print_help()
-        sys.exit(2)
+   def error(self, message):
+      sys.stderr.write('error: %s\n' % message)
+      self.print_help()
+      sys.exit(2)
 
 
 def parse_branch_name(name):
