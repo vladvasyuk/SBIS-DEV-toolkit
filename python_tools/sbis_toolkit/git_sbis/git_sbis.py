@@ -82,8 +82,8 @@ def get_branches_for_mr():
       cur_branch_val = get_branch_value(cur_branch_name)
 
       for rc_branch in rc_branches:
-         if cur_branch_val <= get_branch_value(rc_branch.name):
-            res.append(rc_branch.name)
+         if cur_branch_val <= get_branch_value(rc_branch):
+            res.append(rc_branch)
 
    return res
 
@@ -99,10 +99,18 @@ def get_branch_value(branch_name):
 
 def get_rc_branches():
    """
-   Получить rc-ветки
+   Получить rc-ветки из remote
    """
    repo = get_current_repo()
-   return filter(lambda b: True if b.name.find('rc-') == 0 else False, repo.branches)
+   remote_name = repo.remotes[0].name
+   refs = repo.remotes[0].refs
+   res = []
+
+   for x in refs:
+      if x.name.find(remote_name + '/rc-') == 0:
+         res.append(re.findall(remote_name + '/(.*)', x.name)[0])
+
+   return res
 
 
 def get_current_repo_name():
