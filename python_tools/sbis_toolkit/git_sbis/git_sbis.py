@@ -35,7 +35,7 @@ def parse_branch_name(name):
    values = re.findall(r"^(.+?)\/(.+?)(\d+)$", name)
 
    if not values or len(values[0]) != 3:
-      print('Wrong current branch name.')
+      print('Wrong branch name.')
       sys.exit(1)
 
    return {
@@ -225,6 +225,23 @@ def command_mr(args):
       open_mr_page(get_current_branch_name(), br)
 
 
+def command_co(args):
+   """
+   Команда - checkout, создает новую ветку наследуясь от родительской (на
+   основе названия) и переключается на неё
+   """
+   br = parse_branch_name(args.branch_name)
+   repo = get_current_repo()
+   remote_name = repo.remotes[0].name
+
+   if br['parent_branch'] == 'dev':
+      parent = remote_name + '/development'
+   else:
+      parent = remote_name + '/rc-' + br['parent_branch']
+
+   repo.git.checkout('-b', args.branch_name, parent)
+
+
 if __name__ == '__main__':
    parser = DefaultHelpParser(prog='Git toolchain for SBIS developers.')
    subparsers = parser.add_subparsers(dest='cmd')
@@ -238,6 +255,10 @@ if __name__ == '__main__':
 
    cp_parser = subparsers.add_parser('cp', help='gs ci && git push origin HEAD && gs mr')
    cp_parser.set_defaults(func=command_cp)
+
+   co_parser = subparsers.add_parser('co', help='Checkout to new branch and set remote tracking by parsing its name.')
+   co_parser.add_argument('branch_name', type=str, help='Branch name for checkout.')
+   co_parser.set_defaults(func=command_co)
 
    acp_parser = subparsers.add_parser('acp', help='git add -u && gs ci && git push origin HEAD && gs mr')
    acp_parser.set_defaults(func=command_acp)
