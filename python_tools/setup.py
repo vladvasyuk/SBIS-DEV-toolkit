@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name='SBISPythonToolkit',
+setup(name='SBISToolkit',
       version='1.0',
       description='SBIS Python dev toolkit.',
       author='Vladislav Vasyuk',
