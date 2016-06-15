@@ -50,4 +50,6 @@ gs config sbis.user password %ваш_пароль%
  - gs **mr** - открывает merge-request'ы на gitlab в соответствующие ветки
  - gs **cp** - соответствует ```gs ci && git push origin HEAD && gs mr```
  - gs **acp** - соответствует ```git add -u && gs ci && git push origin HEAD && gs mr```
+ - gs **vacp** - проверяет валидацию и далее ```git add -u && gs ci && git push origin HEAD && gs mr```
+ - gs **vcp** - проверяет валидацию и далее ```gs ci && git push origin HEAD && gs mr```
  - gs **config** - настройки утилиты

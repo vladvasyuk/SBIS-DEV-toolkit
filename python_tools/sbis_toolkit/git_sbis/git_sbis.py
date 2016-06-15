@@ -1,5 +1,6 @@
 import sbis_toolkit
 from sbis_toolkit.utils.rpc_client import RpcClient
+from sbis_toolkit.utils.hooks import search_in_diff
 from sbis_toolkit.bl_methods import docs
 from git import Repo
 from urllib.parse import quote
@@ -241,6 +242,41 @@ def command_co(args):
 
    repo.git.checkout('-b', args.branch_name, parent)
 
+# todo: пришлось декоратор закинуть сюда, т.к. пока не вынесены конфиги и работа с гитом в отдельные файлы
+#       а так надо вынести декоратор тоже в отдельный файл
+def validate(function_to_decorate):
+   def wrapper(arg):
+     config = configparser.ConfigParser()
+     config.read(CONFIG_PATH)
+     repo = get_current_repo()
+   
+     try:
+        regexps = config['git_hooks_regxp']
+        validate_flag, validate_text = search_in_diff(repo.git.diff('HEAD~1'), regexps)
+        if validate_flag:
+           print('Validate is successful. ' + validate_text)
+           function_to_decorate(args)
+        else:
+           print('No validate successful. No correct code in file ' + validate_text)
+     except KeyError:
+        print('No sectial "git_hooks_regxp" in config. Please reinstall this package.')
+   return wrapper
+
+#by madreyg
+@validate
+def command_vacp(args):
+   """
+   Проверяет валидацию с regex'пами из конфига + команда - add, commit, push
+   """
+   command_acp(args)
+
+#by madreyg
+@validate
+def command_vcp(args):
+   """
+   Проверяет валидацию с regex'пами из конфига + команда - commit, push
+   """
+   command_cp(args)
 
 if __name__ == '__main__':
    parser = DefaultHelpParser(prog='Git toolchain for SBIS developers.')
@@ -262,6 +298,12 @@ if __name__ == '__main__':
 
    acp_parser = subparsers.add_parser('acp', help='git add -u && gs ci && git push origin HEAD && gs mr')
    acp_parser.set_defaults(func=command_acp)
+
+   acp_parser = subparsers.add_parser('vacp', help='validates and git add -u && gs ci && git push origin HEAD && gs mr')
+   acp_parser.set_defaults(func=command_vacp)
+
+   acp_parser = subparsers.add_parser('vcp', help='validates and git add -u && gs ci && git push origin HEAD && gs mr')
+   acp_parser.set_defaults(func=command_vcp)
 
    conf_parser = subparsers.add_parser('config', help='Change config.')
    conf_parser.add_argument('section')
