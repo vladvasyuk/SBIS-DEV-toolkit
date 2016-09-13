@@ -52,4 +52,6 @@ gs config sbis.user password %ваш_пароль%
  - gs **acp** - соответствует ```git add -u && gs ci && git push origin HEAD && gs mr```
  - gs **vacp** - проверяет валидацию и далее ```git add -u && gs ci && git push origin HEAD && gs mr```
  - gs **vcp** - проверяет валидацию и далее ```gs ci && git push origin HEAD && gs mr```
+ - gs **pmr** - git push origin HEAD && gs mr
+ - gs **fix** [branch_name] - метод разрешения конфликтов - переключается на новую ветку и делает merge оригинальной
  - gs **config** - настройки утилиты
