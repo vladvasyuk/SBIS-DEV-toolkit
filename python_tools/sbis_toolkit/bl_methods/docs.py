@@ -13,10 +13,11 @@ def get_doc_info_by_number(number, rpc_cli):
    if not doc:
       raise Exception('Документ не найден!')
 
-   return ('{reg_title} от {doc_date} №{doc_number}\n'
+   return ('https://inside.tensor.ru/opendoc.html?guid={guid}\n'
+           '{type_title} от {doc_date} №{doc_number}\n'
            '{doc_text}\n'
-           'https://inside.tensor.ru/opendoc.html?guid={guid}').format(
-      reg_title=doc['Регламент.Название'],
+          ).format(
+      type_title=doc['ТипДокумента.НазваниеКраткое'],
       doc_date=doc['Документ.Дата'],
       doc_number=doc['Документ.Номер'],
       doc_text=re.sub('<[^<]+?>', '', doc['РазличныеДокументы.Информация'])[:100] + '...',

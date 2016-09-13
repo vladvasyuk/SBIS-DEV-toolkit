@@ -41,7 +41,8 @@ def parse_branch_name(name):
 
    return {
       'parent_branch': values[0][0],
-      'task_number': values[0][2]
+      'task_number': values[0][2],
+      'branch_name': values[0][1] + values[0][2]
    }
 
 
@@ -157,6 +158,16 @@ def command_acp(args):
 
       for br in get_branches_for_mr():
          open_mr_page(cur_branch, br)
+
+
+def command_pmr(args):
+   """
+   Команда - push, mr
+   """
+   repo = get_current_repo()
+   cur_branch = get_current_branch_name()
+   repo.remotes.origin.push(cur_branch)
+   command_mr(args)
 
 
 def command_cp(args):
@@ -278,6 +289,52 @@ def command_vcp(args):
    """
    command_cp(args)
 
+def command_fix(args):
+   """
+   Команда fix. Метод предназначен для разрешения конфликтов. Работает следующим
+   образом:
+   Получив название ветки, в которую необходимо разрешить конфликт, создает новую
+   с таким же названием как и у оригинальной, за исключением начального префикса - 
+   он устанавливается согласно названию конфликтующей ветки. Затем выполняет
+   merge оригинальной ветки в текущую.
+   """
+   parent_branch = args.branch_name
+   original_branch_name = get_current_branch_name()
+   current_branch = parse_branch_name(original_branch_name)
+   # Разбираем название переданной ветки
+   if parent_branch in ('development', 'dev'):
+      parent_prefix = 'dev'
+      parent_branch = 'development'
+   else:
+      try:
+         # Полагаем, что это ветка rc-x.x.x
+         parent_prefix = parent_branch.split('-', 1)[1]
+      except IndexError:
+         # Полагаем, что передана последняя часть версии текущей rc-ветки:
+         # rc-3.7.4.xxx
+         parent_branch = 'rc-{}.{}'.format(
+            # Извлекаем первую часть названия текущей ветки
+            '.'.join(current_branch['parent_branch'].split('.')[0:-1]),
+            # И присоединяем последнюю (переданную часть)
+            parent_branch
+         )
+         parent_prefix = parent_branch.split('-', 1)[1]
+
+   repo = get_current_repo()
+   remote_name = repo.remotes[0].name
+
+   # Формируем название новой ветки из префикса из названия родителя
+   # и оригинального названия ветки
+   new_branch_name = '{}/{}'.format(
+      parent_prefix, current_branch['branch_name'])
+
+   # Создаем и переключаемся на новую ветку
+   repo.git.checkout('-b', new_branch_name, remote_name + '/' + parent_branch)
+
+   # Делаем merge оригинальной ветки в новую (текущую)
+   repo.git.merge(original_branch_name)
+
+
 if __name__ == '__main__':
    parser = DefaultHelpParser(prog='Git toolchain for SBIS developers.')
    subparsers = parser.add_subparsers(dest='cmd')
@@ -299,11 +356,20 @@ if __name__ == '__main__':
    acp_parser = subparsers.add_parser('acp', help='git add -u && gs ci && git push origin HEAD && gs mr')
    acp_parser.set_defaults(func=command_acp)
 
+
    acp_parser = subparsers.add_parser('vacp', help='validates and git add -u && gs ci && git push origin HEAD && gs mr')
    acp_parser.set_defaults(func=command_vacp)
 
    acp_parser = subparsers.add_parser('vcp', help='validates and git add -u && gs ci && git push origin HEAD && gs mr')
    acp_parser.set_defaults(func=command_vcp)
+
+   pmr_parser = subparsers.add_parser('pmr', help='git push origin HEAD && gs mr')
+   pmr_parser.set_defaults(func=command_pmr)
+
+   fix_parser = subparsers.add_parser('fix', help='Method designed for fixing conflicts. Full information can be found in README.')
+   fix_parser.add_argument('branch_name', type=str, help='Branch name for fix conflict.')
+   fix_parser.set_defaults(func=command_fix)
+
 
    conf_parser = subparsers.add_parser('config', help='Change config.')
    conf_parser.add_argument('section')
