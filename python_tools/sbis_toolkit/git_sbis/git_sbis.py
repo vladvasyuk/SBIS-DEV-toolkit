@@ -33,9 +33,9 @@ def parse_branch_name(name):
 
    Ex.: 3.7.3.200/bugfix/capital/capitalname-style-fix-1172833927
    """
-   values = re.findall(r"^(.+?)\/(.+?)(\d+)$", name)
+   values = re.findall(r"^(.+?)\/(.+?)(\d+)?$", name)
 
-   if not values or len(values[0]) != 3:
+   if not values or len(values[0]) < 2:
       print('Wrong branch name.')
       sys.exit(1)
 
@@ -76,7 +76,7 @@ def get_branches_for_mr():
    """
    Получить ветки, в которые нужно создать merge request
    """
-   res = ['development']
+   res = []
    cur_branch_name = parse_branch_name(get_current_branch_name())['parent_branch']
 
    if cur_branch_name != 'dev':
@@ -96,7 +96,10 @@ def get_branch_value(branch_name):
 
    :param branch_name:
    """
-   return int(''.join(re.findall(u'\d', branch_name)))
+   # Получим строку только с цифрами
+   parsed = ''.join(re.findall(u'\d', branch_name))
+   # Дополняем строку до 10 символов, добавляя нули в конец
+   return int(parsed + '0' * (10 - len(parsed)))
 
 
 def get_rc_branches():
@@ -296,7 +299,7 @@ def command_fix(args):
    Получив название ветки, в которую необходимо разрешить конфликт, создает новую
    с таким же названием как и у оригинальной, за исключением начального префикса - 
    он устанавливается согласно названию конфликтующей ветки. Затем выполняет
-   merge оригинальной ветки в текущую.
+   merge оригинальной ветки в текущую. Затем pmr
    """
    parent_branch = args.branch_name
    original_branch_name = get_current_branch_name()
@@ -333,6 +336,7 @@ def command_fix(args):
 
    # Делаем merge оригинальной ветки в новую (текущую)
    repo.git.merge(original_branch_name)
+   command_pmr(args)
 
 
 if __name__ == '__main__':
