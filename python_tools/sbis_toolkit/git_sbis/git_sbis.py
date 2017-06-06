@@ -15,7 +15,7 @@ import webbrowser
 
 
 MR_URL = "https://git.sbis.ru/{repo}/merge_requests/new?merge_request%5Bsource_branch%5D={source}&merge_request%5Btarget_branch%5D={target}"
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(sbis_toolkit.__file__))) + '\\config.ini'
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(sbis_toolkit.__file__)), 'config.ini')
 
 
 class DefaultHelpParser(argparse.ArgumentParser):
@@ -197,7 +197,7 @@ def get_rpc_cli():
       config = configparser.ConfigParser()
       config.read(CONFIG_PATH)
 
-      rpc_cli = RpcClient('inside.tensor.ru', False)
+      rpc_cli = RpcClient('online.sbis.ru', False)
 
       try:
          login = config['sbis.user']['login']
