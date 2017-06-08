@@ -12,6 +12,7 @@ import git
 import argparse
 import sys
 import webbrowser
+from distutils.version import LooseVersion
 
 
 MR_URL = "https://git.sbis.ru/{repo}/merge_requests/new?merge_request%5Bsource_branch%5D={source}&merge_request%5Btarget_branch%5D={target}"
@@ -80,7 +81,7 @@ def get_branches_for_mr():
    cur_branch_name = parse_branch_name(get_current_branch_name())['parent_branch']
 
    if cur_branch_name != 'dev':
-      rc_branches = get_rc_branches()
+      rc_branches = get_rc_branches(fetch=True)
       cur_branch_val = get_branch_value(cur_branch_name)
 
       for rc_branch in rc_branches:
@@ -96,19 +97,19 @@ def get_branch_value(branch_name):
 
    :param branch_name:
    """
-   # Получим строку только с цифрами
-   parsed = ''.join(re.findall(u'\d', branch_name))
-   # Дополняем строку до 10 символов, добавляя нули в конец
-   return int(parsed + '0' * (10 - len(parsed)))
+   return LooseVersion(branch_name.replace('rc-', ''))
 
 
-def get_rc_branches():
+def get_rc_branches(fetch=False):
    """
    Получить rc-ветки из remote
    """
    repo = get_current_repo()
-   remote_name = repo.remotes[0].name
-   refs = repo.remotes[0].refs
+   remote = repo.remotes[0] 
+   if fetch:
+      remote.fetch()
+   remote_name = remote.name
+   refs = remote.refs
    res = []
 
    for x in refs:
