@@ -1,9 +1,10 @@
-#SBIS DEV toolkit
+SBIS DEV toolkit
+================
 
 Набор утилит для разработчиков SBIS
 
-##SBISPythonToolkit
-------------
+SBISPythonToolkit
+-----------------
 
 **git sbis**  
 Обертки для команд git для оптимизации процесса работы с репозиториями sbis
